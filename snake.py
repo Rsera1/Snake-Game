@@ -9,6 +9,7 @@ from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
+from direct.actor.Actor import Actor
 from pyjoycon import JoyCon, get_R_id
 import time, sys
 
@@ -20,16 +21,12 @@ except:
     print("JoyCon can't connect")
 
 
-def con():
-    try:
-        joycon_id = get_R_id()
-        joycon = JoyCon(*joycon_id)
-    except ValueError:
-        print("JoyCon can't connect")
 
 scrn = 1
 vid = 0
 
+snake_x = 0
+snake_y = 0
 # Function to put instructions on the screen.
 def addInstructions(pos, msg):
     return OnscreenText(text=msg, style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
@@ -60,7 +57,8 @@ class MediaPlayer(ShowBase):
         #self.video()
         self.videoTask = taskMgr.add(self.video, "video")
         self.gameTask = taskMgr.add(self.gameLoop, "gameLoop")
-        #self.butTask = taskMgr.add(self.butLoop, "butLoop")
+        self.butTask = taskMgr.add(self.butLoop, "butLoop")
+
 
         self.selectCycle()
         
@@ -68,6 +66,10 @@ class MediaPlayer(ShowBase):
         self.m = self.loader.loadModel("snake_game.egg")
         self.m.reparentTo(self.render)
         self.m.setPosHpr(0, 45, 0, 0, 45, 0)
+        self.snake = Actor("python.egg")
+        self.snake.reparentTo(self.render)
+        self.snake.setPosHpr(0.2, 46, -1, 0, 45, 0)
+
 
     def title_screen(self):
         self.t1 = addTitle(0.5, "PYTHO")
@@ -116,39 +118,14 @@ class MediaPlayer(ShowBase):
 
         elif cycle == 3 and scrn == 1:
             sys.exit()
-            
+
         cycle = 1
         self.selectCycle()
-
-    def joy(self, arr):
-
-        
-        arr2 = arr['analog-sticks']['right']
-        global ct,ct2,cycle
-
-        if (3000 < arr2['horizontal'] < 3400) and (1200 < arr2['vertical'] < 2300):
-            if ct > 10:
-                if cycle < 3:
-                    cycle += 1
-                    self.selectCycle()
-                ct = 0
-            else:
-                ct += 1
-
-        elif (800 < arr2['horizontal'] < 1200) and (1200 < arr2['vertical'] < 2300):
-            if ct2 > 10:
-                if cycle > 1:
-                    cycle -= 1
-                    self.selectCycle()
-                ct2 = 0
-            else:
-                ct2 += 1
-        elif not((3000 < arr2['horizontal'] < 3400) and (1200 < arr2['vertical'] < 2300) or (800 < arr2['horizontal'] < 1200) and (1200 < arr2['vertical'] < 2300)):
-            ct,ct2 = 11,11
 
     def butLoop(self, task):
         global new,rs_down,rs_up
         global cycle, scrn
+        global snake_x, snake_y
         try:
             arr = joycon.get_status()
             arr2 = arr['buttons']['right']
@@ -183,7 +160,24 @@ class MediaPlayer(ShowBase):
                     if up:
                         self.keyboard_up(1)
                     rs_up = up
-            
+
+            elif scrn == 3:
+                if down + rs_down == 1:
+                    if down:
+                        if snake_x >= -8.0 and snake_y >= -8.0:
+                            snake_x -= 0.5
+                            snake_y -= 0.5
+                            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, -180, -45, 0)
+                    rs_down = down
+
+                elif up + rs_up == 1:
+                    if up:
+                        if snake_x <= 8.0 and snake_y <= 8.0:
+                            snake_x += 0.5
+                            snake_y += 0.5
+                            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, 0, 45, 0)
+                    rs_up = up
+
         except NameError:
             print("JoyCon Status Denied")
 
@@ -194,7 +188,6 @@ class MediaPlayer(ShowBase):
     def gameLoop(self, task):
         global cycle, scrn
 
-        
         if scrn == 1:
             self.accept('arrow_down', self.keyboard_down, [3])
             self.accept('arrow_up', self.keyboard_up, [1])
@@ -203,6 +196,10 @@ class MediaPlayer(ShowBase):
         elif scrn == 2:
             self.accept('arrow_down', self.keyboard_down, [2])
             self.accept('arrow_up', self.keyboard_up, [1])
+
+        elif scrn == 3:
+            self.accept('arrow_down', self.kb_snake_up)
+            self.accept('arrow_up', self.kb_snake_dn)
 
         self.accept('enter', self.enter_button) 
 
@@ -219,6 +216,21 @@ class MediaPlayer(ShowBase):
         if cycle < mx:
             cycle += 1
             self.selectCycle()
+
+    def kb_snake_dn(self):
+        global snake_x, snake_y
+        if snake_x <= 7.5 and snake_y <= 7.5:
+            snake_x += 0.5
+            snake_y += 0.5
+            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, 0, 45, 0)
+            
+    def kb_snake_up(self):
+        global snake_x, snake_y
+        if snake_x >= -7.5 and snake_y >= -7.5:
+            snake_x -= 0.5
+            snake_y -= 0.5
+            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, -180, -45, 0)
+            
 
     def selectCycle(self):
         global cycle,scrn
