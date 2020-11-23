@@ -83,7 +83,6 @@ class MediaPlayer(ShowBase):
         self.snake.reparentTo(self.render)
         self.snake.setPosHpr(0.2, 46, -1, 0, 45, 0)
 
-
     def title_screen(self):
         self.t1 = addTitle(0.5, "PYTHO")
         self.t2 = addInstructions(1, "START")
@@ -234,14 +233,14 @@ class MediaPlayer(ShowBase):
 
     def kb_snake_dn(self):
         global snake_x, snake_y, flag
-        if snake_x <= 7.0 and snake_y <= 7.0:
+        if snake_x <= 6.5 and snake_y <= 6.5:
             flag[0] = 0;flag[2] = 0;flag[3] = 0
             if flag[1] == 0:    
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
                 flag[1] = 1
             else:
-                snake_x += 0.5
-                snake_y += 0.5
+                snake_x += 0.65
+                snake_y += 0.65
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
                 
             
@@ -253,8 +252,8 @@ class MediaPlayer(ShowBase):
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
                 flag[0] = 1
             else:
-                snake_x -= 0.5
-                snake_y -= 0.5
+                snake_x -= 0.65
+                snake_y -= 0.65
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
             
            
@@ -266,20 +265,20 @@ class MediaPlayer(ShowBase):
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
                 flag[2] = 1
             else:
-                snake_z -= 0.5
+                snake_z -= 1
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
             
             
 
     def kb_snake_rt(self):
         global snake_x, snake_y, snake_z
-        if snake_z <= 10.0:
+        if snake_z <= 9.5:
             flag[0] = 0;flag[1] = 0;flag[2] = 0
             if flag[3] == 0:
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
                 flag[3] = 1
             else:
-                snake_z += 0.5
+                snake_z += 1
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
 
     def selectCycle(self):
