@@ -13,9 +13,9 @@ from direct.actor.Actor import Actor
 
 import time, sys, os
 
-if os.name == 'nt':
+if os.environ.get('OS','') == 'Windows_NT':
     from pyjoycon import JoyCon, get_R_id
-    
+
 
 
 try:
