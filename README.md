@@ -1,9 +1,9 @@
 # Snake-Game
 
 ## Install:
-1. Panda3D is for the graphics for the game.\
-```pip install Panda3D```
-
+1. ```pip install Panda3D```
+2. ```pip install hid```
+3. ```pip install joycon-python hidapi pyglm```
 ## Run: 
 ```python <directory>\snake.py```
 
