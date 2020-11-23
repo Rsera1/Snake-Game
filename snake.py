@@ -234,7 +234,7 @@ class MediaPlayer(ShowBase):
 
     def kb_snake_dn(self):
         global snake_x, snake_y, flag
-        if snake_x <= 7.5 and snake_y <= 7.5:
+        if snake_x <= 7.0 and snake_y <= 7.0:
             flag[0] = 0;flag[2] = 0;flag[3] = 0
             if flag[1] == 0:    
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
@@ -247,7 +247,7 @@ class MediaPlayer(ShowBase):
             
     def kb_snake_up(self):
         global snake_x, snake_y
-        if snake_x >= -7.5 and snake_y >= -7.5:
+        if snake_x >= -7.0 and snake_y >= -7.0:
             flag[1] = 0;flag[2] = 0;flag[3] = 0
             if flag[0] == 0:
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
@@ -260,7 +260,7 @@ class MediaPlayer(ShowBase):
            
     def kb_snake_lt(self):
         global snake_x, snake_y, snake_z
-        if snake_z >= -11.5:
+        if snake_z >= -10.5:
             flag[0] = 0;flag[1] = 0;flag[3] = 0
             if flag[2] == 0:
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
@@ -273,7 +273,7 @@ class MediaPlayer(ShowBase):
 
     def kb_snake_rt(self):
         global snake_x, snake_y, snake_z
-        if snake_z <= 11.0:
+        if snake_z <= 10.0:
             flag[0] = 0;flag[1] = 0;flag[2] = 0
             if flag[3] == 0:
                 self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
