@@ -164,7 +164,7 @@ class MediaPlayer(ShowBase):
             elif scrn == 3:
                 if down + rs_down == 1:
                     if down:
-                        if snake_x >= -8.0 and snake_y >= -8.0:
+                        if snake_x >= -7.5 and snake_y >= -7.5:
                             snake_x -= 0.5
                             snake_y -= 0.5
                             self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, -180, -45, 0)
@@ -172,7 +172,7 @@ class MediaPlayer(ShowBase):
 
                 elif up + rs_up == 1:
                     if up:
-                        if snake_x <= 8.0 and snake_y <= 8.0:
+                        if snake_x <= 7.5 and snake_y <= 7.5:
                             snake_x += 0.5
                             snake_y += 0.5
                             self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, 0, 45, 0)
