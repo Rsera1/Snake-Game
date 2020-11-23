@@ -14,6 +14,7 @@ This is a snake game. You are a snake that must eat the orbs. Everytime you eat 
 ```
 up-arrow = scroll up
 down-arrow = scroll down
+enter = select option
 ```
 - Right Nintendo Joycon
 ```
