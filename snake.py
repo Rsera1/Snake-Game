@@ -14,7 +14,11 @@ from direct.actor.Actor import Actor
 import time, sys, os
 
 if os.environ.get('OS','') == 'Windows_NT':
-    from pyjoycon import JoyCon, get_R_id
+    try:
+        from pyjoycon import JoyCon, get_R_id
+    except:
+        print("hidapi libraries not found")
+
 
 
 
@@ -31,6 +35,11 @@ vid = 0
 
 snake_x = 0
 snake_y = 0
+snake_z = 0
+
+flag = [0,0,0,0]
+# flag = [up, down, left, right]
+
 # Function to put instructions on the screen.
 def addInstructions(pos, msg):
     return OnscreenText(text=msg, style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
@@ -204,6 +213,8 @@ class MediaPlayer(ShowBase):
         elif scrn == 3:
             self.accept('arrow_down', self.kb_snake_up)
             self.accept('arrow_up', self.kb_snake_dn)
+            self.accept('arrow_left', self.kb_snake_lt)
+            self.accept('arrow_right', self.kb_snake_rt)
 
         self.accept('enter', self.enter_button) 
 
@@ -222,19 +233,54 @@ class MediaPlayer(ShowBase):
             self.selectCycle()
 
     def kb_snake_dn(self):
-        global snake_x, snake_y
+        global snake_x, snake_y, flag
         if snake_x <= 7.5 and snake_y <= 7.5:
-            snake_x += 0.5
-            snake_y += 0.5
-            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, 0, 45, 0)
+            flag[0] = 0;flag[2] = 0;flag[3] = 0
+            if flag[1] == 0:    
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
+                flag[1] = 1
+            else:
+                snake_x += 0.5
+                snake_y += 0.5
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
+                
             
     def kb_snake_up(self):
         global snake_x, snake_y
         if snake_x >= -7.5 and snake_y >= -7.5:
-            snake_x -= 0.5
-            snake_y -= 0.5
-            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, -180, -45, 0)
+            flag[1] = 0;flag[2] = 0;flag[3] = 0
+            if flag[0] == 0:
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
+                flag[0] = 1
+            else:
+                snake_x -= 0.5
+                snake_y -= 0.5
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
             
+           
+    def kb_snake_lt(self):
+        global snake_x, snake_y, snake_z
+        if snake_z >= -11.5:
+            flag[0] = 0;flag[1] = 0;flag[3] = 0
+            if flag[2] == 0:
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
+                flag[2] = 1
+            else:
+                snake_z -= 0.5
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
+            
+            
+
+    def kb_snake_rt(self):
+        global snake_x, snake_y, snake_z
+        if snake_z <= 11.0:
+            flag[0] = 0;flag[1] = 0;flag[2] = 0
+            if flag[3] == 0:
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
+                flag[3] = 1
+            else:
+                snake_z += 0.5
+                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
 
     def selectCycle(self):
         global cycle,scrn
