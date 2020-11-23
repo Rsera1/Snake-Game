@@ -10,8 +10,12 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.actor.Actor import Actor
-from pyjoycon import JoyCon, get_R_id
-import time, sys
+
+import time, sys, os
+
+if os.name == 'nt':
+    from pyjoycon import JoyCon, get_R_id
+    
 
 
 try:
