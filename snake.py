@@ -10,17 +10,14 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.actor.Actor import Actor
-
-import time, sys, os
+import random
+import time, sys, os, json
 
 if os.environ.get('OS','') == 'Windows_NT':
     try:
         from pyjoycon import JoyCon, get_R_id
     except:
         print("hidapi libraries not found")
-
-
-
 
 try:
     joycon_id = get_R_id()
@@ -29,18 +26,25 @@ except:
     print("JoyCon can't connect")
 
 
+with open('placement.txt') as f: 
+    data = f.read() 
+  
+d = json.loads(data) 
 
+food_pos = '0 2 2'
+food_flag = 0
 scrn = 1
 vid = 0
 
-snake_x = 0
-snake_y = 0
-snake_z = 0
+
+snake = [0,0,0]
 
 flag = [0,0,0,0]
-# flag = [up, down, left, right]
 
-# Function to put instructions on the screen.
+
+ent = [[0 for c in range(22)] for r in range(22)]
+
+
 def addInstructions(pos, msg):
     return OnscreenText(text=msg, style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
                         parent=base.a2dTopLeft, align=TextNode.ALeft,
@@ -72,18 +76,22 @@ class MediaPlayer(ShowBase):
         #self.video()
         self.videoTask = taskMgr.add(self.video, "video")
         self.gameTask = taskMgr.add(self.gameLoop, "gameLoop")
-        self.butTask = taskMgr.add(self.butLoop, "butLoop")
-
+        #self.butTask = taskMgr.add(self.butLoop, "butLoop")
+        self.entTask = taskMgr.add(self.entLoop, "entLoop")
 
         self.selectCycle()
         
     def snake_screen(self):
+        global d
         self.m = self.loader.loadModel("snake_game.egg")
         self.m.reparentTo(self.render)
         self.m.setPosHpr(0, 45, 0, 0, 45, 0)
         self.snake = Actor("python.egg")
         self.snake.reparentTo(self.render)
         self.snake.setPosHpr(0.2, 46, -1, 0, 45, 0)
+        self.food = Actor("Food.egg")
+        self.food.reparentTo(self.render)
+        self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
 
     def title_screen(self):
         self.t1 = addTitle(0.5, "PYTHO")
@@ -111,7 +119,7 @@ class MediaPlayer(ShowBase):
         self.del_options_screen()
         
     def enter_button(self):
-        global cycle, scrn, vid
+        global cycle, scrn, vid, food_flag
         
         if cycle == 2 and scrn == 1:     
             scrn = 2
@@ -124,6 +132,7 @@ class MediaPlayer(ShowBase):
             self.selector.destroy()
             self.del_title_screen()
             self.snake_screen()
+            food_flag = 1
                      
         elif cycle == 2 and scrn == 2:
             scrn = 1
@@ -139,7 +148,6 @@ class MediaPlayer(ShowBase):
     def butLoop(self, task):
         global new,rs_down,rs_up,rs_left,rs_right
         global cycle, scrn
-        global snake_x, snake_y
         try:
             arr = joycon.get_status()
             arr2 = arr['buttons']['right']
@@ -207,7 +215,7 @@ class MediaPlayer(ShowBase):
         return Task.cont
 
     def gameLoop(self, task):
-        global cycle, scrn, ct2
+        global cycle, scrn, ct2, snake
 
         if scrn == 1:
             self.accept('arrow_down', self.keyboard_down, [3])
@@ -221,6 +229,7 @@ class MediaPlayer(ShowBase):
         elif scrn == 3:
             if ct2 == 5:
                 self.direction()
+                #print(snake)
                 ct2 = 0
             else:
                 ct2 += 1
@@ -276,36 +285,35 @@ class MediaPlayer(ShowBase):
 
 
     def snake_up(self):
-        global snake_x, snake_y
-        if snake_x <= 6.5 and snake_y <= 6.5:
-            snake_x += 0.65
-            snake_y += 0.65
-            self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
+        global snake
+        if snake[0] <= 6.5 and snake[1] <= 6.5:
+            snake[0] += 0.65
+            snake[1] += 0.65
+            self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], 0, 45, 0)
                 
             
     def snake_dn(self):
-        global snake_x, snake_y
-        if snake_x >= -7.0 and snake_y >= -7.0:
-            snake_x -= 0.65
-            snake_y -= 0.65
-            self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
+        global snake
+        if snake[0] >= -7.0 and snake[1] >= -7.0:
+            snake[0] -= 0.65
+            snake[1] -= 0.65
+            self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], -180, -45, 0)
             
            
     def snake_lt(self):
-        global snake_x, snake_y, snake_z
-        if snake_z >= -10.5:
-            snake_z -= 1
-            self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
+        global snake
+        if snake[2] >= -10.5:
+            snake[2] -= 1
+            self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, 90, 0, 0)
             
             
 
     def snake_rt(self):
-        global snake_x, snake_y, snake_z
-        if snake_z <= 9.5:
-            snake_z += 1
-            self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
+        global snake
+        if snake[2] <= 9.5:
+            snake[2] += 1
+            self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, -90, 0, 0)
 
-    
 
     def selectCycle(self):
         global cycle,scrn
@@ -382,7 +390,29 @@ class MediaPlayer(ShowBase):
             return Task.done
         else:
             return Task.cont
-        
+
+    def fod(self):
+        global food_pos, snake
+        ss = list(d.keys())[list(d.values()).index(snake)]
+        fd1 = ss.split()
+        fd2 =food_pos.split()
+        #ss2 = '{} {} {}'.format(int(ss1[0]),int(ss1[1]) + 1,int(ss1[2]) + 1)
+        if int(fd1[1])+1 == int(fd2[1]) and int(fd1[2]) == int(fd2[2]):
+            x = random.randint(1, 21)
+            y = random.randint(1, 21)
+            if ent[x][y] != 1:
+                food_pos = '0 {} {}'.format(x,y)
+        self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
+
+    def entLoop(self,task):
+        global ent, snake, food_flag
+        if food_flag == 1:
+            self.fod()
+        ent = [[0 for c in range(22)] for r in range(22)]
+        lst = list(d.keys())[list(d.values()).index(snake)]
+        key = lst.split()
+        ent[int(key[1])][int(key[2])] = 1
+        return Task.cont 
 
 player = MediaPlayer()
 player.run()
