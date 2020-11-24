@@ -60,6 +60,8 @@ cycle = 0
 new = 0
 rs_down = 0
 rs_up = 0
+rs_left = 0
+rs_right = 0
 class MediaPlayer(ShowBase):
     
     def __init__(self):
@@ -135,13 +137,14 @@ class MediaPlayer(ShowBase):
         self.selectCycle()
 
     def butLoop(self, task):
-        global new,rs_down,rs_up
+        global new,rs_down,rs_up,rs_left,rs_right
         global cycle, scrn
         global snake_x, snake_y
         try:
             arr = joycon.get_status()
             arr2 = arr['buttons']['right']
             arr3 = arr['analog-sticks']['right']
+            #print(arr3)
 
             if arr2['a'] + new == 1:
                 if arr2['a'] == 1:
@@ -150,6 +153,8 @@ class MediaPlayer(ShowBase):
 
             down = int((3000 < arr3['horizontal'] < 3400) and (1200 < arr3['vertical'] < 2300))
             up = int((800 < arr3['horizontal'] < 1200) and (1200 < arr3['vertical'] < 2300))
+            left = int((1300 < arr3['horizontal'] < 2800) and (700 < arr3['vertical'] < 1000))
+            right = int((1300 < arr3['horizontal'] < 2800) and (2500 < arr3['vertical'] < 2900))
 
             if scrn == 1:
                 if down + rs_down == 1:
@@ -176,19 +181,23 @@ class MediaPlayer(ShowBase):
             elif scrn == 3:
                 if down + rs_down == 1:
                     if down:
-                        if snake_x >= -7.5 and snake_y >= -7.5:
-                            snake_x -= 0.5
-                            snake_y -= 0.5
-                            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, -180, -45, 0)
+                        self.dn_flag()
                     rs_down = down
 
                 elif up + rs_up == 1:
                     if up:
-                        if snake_x <= 7.5 and snake_y <= 7.5:
-                            snake_x += 0.5
-                            snake_y += 0.5
-                            self.snake.setPosHpr(0.2, 46+snake_x, -1+snake_y, 0, 45, 0)
+                        self.up_flag()
                     rs_up = up
+
+                elif left + rs_left == 1:
+                    if left:
+                        self.lt_flag()
+                    rs_left = left
+
+                elif right + rs_right == 1:
+                    if right:
+                        self.rt_flag()
+                    rs_right = right
 
         except NameError:
             print("JoyCon Status Denied")
@@ -198,7 +207,7 @@ class MediaPlayer(ShowBase):
         return Task.cont
 
     def gameLoop(self, task):
-        global cycle, scrn
+        global cycle, scrn, ct2
 
         if scrn == 1:
             self.accept('arrow_down', self.keyboard_down, [3])
@@ -210,10 +219,16 @@ class MediaPlayer(ShowBase):
             self.accept('arrow_up', self.keyboard_up, [1])
 
         elif scrn == 3:
-            self.accept('arrow_down', self.kb_snake_up)
-            self.accept('arrow_up', self.kb_snake_dn)
-            self.accept('arrow_left', self.kb_snake_lt)
-            self.accept('arrow_right', self.kb_snake_rt)
+            if ct2 == 5:
+                self.direction()
+                ct2 = 0
+            else:
+                ct2 += 1
+
+            self.accept('arrow_down', self.dn_flag)
+            self.accept('arrow_up', self.up_flag)
+            self.accept('arrow_left', self.lt_flag)
+            self.accept('arrow_right', self.rt_flag)
 
         self.accept('enter', self.enter_button) 
 
@@ -231,55 +246,66 @@ class MediaPlayer(ShowBase):
             cycle += 1
             self.selectCycle()
 
-    def kb_snake_dn(self):
-        global snake_x, snake_y, flag
+
+
+    def dn_flag(self):
+        global flag
+        flag = [1,0,0,0]
+    def up_flag(self):
+        global flag
+        flag = [0,1,0,0]
+    def lt_flag(self):
+        global flag
+        flag = [0,0,1,0]
+    def rt_flag(self):
+        global flag
+        flag = [0,0,0,1]
+
+
+
+    def direction(self):
+        global flag
+        if flag[0] == 1:
+            self.snake_dn()
+        elif flag[1] == 1:
+            self.snake_up()
+        elif flag[2] == 1:
+            self.snake_lt()
+        elif flag[3] == 1:
+            self.snake_rt()
+
+
+    def snake_up(self):
+        global snake_x, snake_y
         if snake_x <= 6.5 and snake_y <= 6.5:
-            flag[0] = 0;flag[2] = 0;flag[3] = 0
-            if flag[1] == 0:    
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
-                flag[1] = 1
-            else:
-                snake_x += 0.65
-                snake_y += 0.65
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
+            snake_x += 0.65
+            snake_y += 0.65
+            self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, 0, 45, 0)
                 
             
-    def kb_snake_up(self):
+    def snake_dn(self):
         global snake_x, snake_y
         if snake_x >= -7.0 and snake_y >= -7.0:
-            flag[1] = 0;flag[2] = 0;flag[3] = 0
-            if flag[0] == 0:
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
-                flag[0] = 1
-            else:
-                snake_x -= 0.65
-                snake_y -= 0.65
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
+            snake_x -= 0.65
+            snake_y -= 0.65
+            self.snake.setPosHpr(0.2+snake_z, 46+snake_x, -1+snake_y, -180, -45, 0)
             
            
-    def kb_snake_lt(self):
+    def snake_lt(self):
         global snake_x, snake_y, snake_z
         if snake_z >= -10.5:
-            flag[0] = 0;flag[1] = 0;flag[3] = 0
-            if flag[2] == 0:
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
-                flag[2] = 1
-            else:
-                snake_z -= 1
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
+            snake_z -= 1
+            self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, 90, 0, 0)
             
             
 
-    def kb_snake_rt(self):
+    def snake_rt(self):
         global snake_x, snake_y, snake_z
         if snake_z <= 9.5:
-            flag[0] = 0;flag[1] = 0;flag[2] = 0
-            if flag[3] == 0:
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
-                flag[3] = 1
-            else:
-                snake_z += 1
-                self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
+            snake_z += 1
+            self.snake.setPosHpr(0.2+snake_z, 46+snake_x-0.7, -1+snake_y-0.7, -90, 0, 0)
+
+    
 
     def selectCycle(self):
         global cycle,scrn
