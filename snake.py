@@ -65,7 +65,8 @@ def addTitle(pos, text):
 
 def addSelector(pos):
     return OnscreenImage(image='Selector1.png', pos=(-1.05,0,0), scale=(0.2,1,0.05))
-
+scr = 0
+hscr = 0
 ct,ct2= 0,0
 cycle = 0
 new = 0
@@ -129,7 +130,7 @@ class MediaPlayer(ShowBase):
                 t.setPosHpr(0.2+d[pos_arr[-i-1]][2], 46+d[pos_arr[-i-1]][0], -1+d[pos_arr[-i-1]][1], int(direct[0]), int(direct[1]), int(direct[2]))
             
     def reset(self):
-        global food_pos, snks, var, snk_length, snk_history, snk_dir, snake, flag, ent, ct, pos_arr, dir_arr
+        global food_pos, snks, var, snk_length, snk_history, snk_dir, snake, flag, ent, ct, pos_arr, dir_arr, scr
         for i in range(len(snks)):
             snks[i].cleanup()
 
@@ -145,6 +146,13 @@ class MediaPlayer(ShowBase):
         ct = 0
         pos_arr = []
         dir_arr = []
+        scr = 0
+
+        self.s_ct.destroy()
+
+        self.s_ct = OnscreenText(text=str(scr), style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        pos=(0.4, -0.2 - 0.04), scale=.09)
 
         self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
 
@@ -179,7 +187,7 @@ class MediaPlayer(ShowBase):
         self.del_options_screen()
         
     def enter_button(self):
-        global cycle, scrn, vid, food_flag, ct
+        global cycle, scrn, vid, food_flag, ct, scr, hscr
         
         if cycle == 2 and scrn == 1:     
             scrn = 2
@@ -192,6 +200,19 @@ class MediaPlayer(ShowBase):
             self.selector.destroy()
             self.del_title_screen()
             self.snake_screen()
+
+            self.highscore = addInstructions(0.1, 'HIGHSCORE:')
+            self.score = addInstructions(0.2, 'SCORE:')
+
+            self.hs_ct = OnscreenText(text=str(hscr), style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        pos=(0.6, -0.1 - 0.04), scale=.09)
+
+            self.s_ct = OnscreenText(text=str(scr), style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        pos=(0.4, -0.2 - 0.04), scale=.09)
+
+
             self.add_snake()
             ct += 1
             food_flag = 1
@@ -290,6 +311,18 @@ class MediaPlayer(ShowBase):
 
         elif scrn == 3:
             if ct2 == 5:
+                self.hs_ct.destroy()
+                self.s_ct.destroy()
+                self.hs_ct = OnscreenText(text=str(hscr), style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        pos=(0.6, -0.1 - 0.04), scale=.09)
+
+                self.s_ct = OnscreenText(text=str(scr), style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        pos=(0.4, -0.2 - 0.04), scale=.09)
+
+
+
                 self.direction()
                 ss = list(d.keys())[list(d.values()).index(snake)]
                 spl = ss.split()
@@ -488,7 +521,7 @@ class MediaPlayer(ShowBase):
             return Task.cont
 
     def fod(self):
-        global food_pos, snake, snk_length, capture
+        global food_pos, snake, snk_length, capture, scr, hscr
         ss = list(d.keys())[list(d.values()).index(snake)]
         fd1 = ss.split()
         fd2 =food_pos.split()
@@ -501,6 +534,10 @@ class MediaPlayer(ShowBase):
             his = ss + " " + snk_dir
             snk_history.append(his)
             capture = 0
+
+            scr += 1
+            if hscr < scr:
+                hscr += 1
             
             if ent[x][y] != 1:
                 self.add_snake()
