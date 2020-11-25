@@ -31,10 +31,17 @@ with open('placement.txt') as f:
   
 d = json.loads(data) 
 
-food_pos = '0 2 2'
+food_pos = '0 4 4'
 food_flag = 0
 scrn = 1
 vid = 0
+
+snks = []
+var = 0
+snk_length = 0
+snk_history = ['0']
+snk_dir = '0 0 0'
+capture = 0
 
 
 snake = [0,0,0]
@@ -66,6 +73,9 @@ rs_down = 0
 rs_up = 0
 rs_left = 0
 rs_right = 0
+snk_list = []
+pos_arr = []
+dir_arr = []
 class MediaPlayer(ShowBase):
     
     def __init__(self):
@@ -76,7 +86,7 @@ class MediaPlayer(ShowBase):
         #self.video()
         self.videoTask = taskMgr.add(self.video, "video")
         self.gameTask = taskMgr.add(self.gameLoop, "gameLoop")
-        #self.butTask = taskMgr.add(self.butLoop, "butLoop")
+        self.butTask = taskMgr.add(self.butLoop, "butLoop")
         self.entTask = taskMgr.add(self.entLoop, "entLoop")
 
         self.selectCycle()
@@ -86,12 +96,62 @@ class MediaPlayer(ShowBase):
         self.m = self.loader.loadModel("snake_game.egg")
         self.m.reparentTo(self.render)
         self.m.setPosHpr(0, 45, 0, 0, 45, 0)
-        self.snake = Actor("python.egg")
-        self.snake.reparentTo(self.render)
-        self.snake.setPosHpr(0.2, 46, -1, 0, 45, 0)
         self.food = Actor("Food.egg")
         self.food.reparentTo(self.render)
         self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
+
+    def add_snake(self):
+        global snks, var, ct
+        snks.append(Actor("python.egg"))
+        for i in range(len(snks)):
+            var = snks[i]
+            var.reparentTo(self.render)
+            if ct == 0:
+                var.setPosHpr(0.2, 46, -1, 0, 45, 0)
+            
+    def update_snake(self):
+        global snks, snk_history, pos_arr, dir_arr
+        
+        for j in snk_history:
+            history = j.split()
+            pos = '{} {} {}'.format(history[0],history[1],history[2])
+            drt = '{} {} {}'.format(history[3],history[4],history[5])
+            pos_arr.append(pos)
+            dir_arr.append(drt)
+
+
+        for i in range(len(snks)-1):
+            t = snks[i]
+            direct = dir_arr[-i-1].split()
+            if int(direct[0]) == 90 or int(direct[0]) == -90:
+                t.setPosHpr(0.2+d[pos_arr[-i-1]][2], 46+d[pos_arr[-i-1]][0]-0.7, -1+d[pos_arr[-i-1]][1]-0.7, int(direct[0]), int(direct[1]), int(direct[2]))
+            else:
+                t.setPosHpr(0.2+d[pos_arr[-i-1]][2], 46+d[pos_arr[-i-1]][0], -1+d[pos_arr[-i-1]][1], int(direct[0]), int(direct[1]), int(direct[2]))
+            
+    def reset(self):
+        global food_pos, snks, var, snk_length, snk_history, snk_dir, snake, flag, ent, ct, pos_arr, dir_arr
+        for i in range(len(snks)):
+            snks[i].cleanup()
+
+        food_pos = '0 4 4'
+        snks = []
+        var = 0
+        snk_length = 0
+        snk_history = ['0']
+        snk_dir = '0 0 0'
+        snake = [0,0,0]
+        flag = [0,0,0,0]
+        ent = [[0 for c in range(22)] for r in range(22)]
+        ct = 0
+        pos_arr = []
+        dir_arr = []
+
+        self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
+
+        self.add_snake()
+        ct += 1
+
+
 
     def title_screen(self):
         self.t1 = addTitle(0.5, "PYTHO")
@@ -119,7 +179,7 @@ class MediaPlayer(ShowBase):
         self.del_options_screen()
         
     def enter_button(self):
-        global cycle, scrn, vid, food_flag
+        global cycle, scrn, vid, food_flag, ct
         
         if cycle == 2 and scrn == 1:     
             scrn = 2
@@ -132,6 +192,8 @@ class MediaPlayer(ShowBase):
             self.selector.destroy()
             self.del_title_screen()
             self.snake_screen()
+            self.add_snake()
+            ct += 1
             food_flag = 1
                      
         elif cycle == 2 and scrn == 2:
@@ -215,7 +277,7 @@ class MediaPlayer(ShowBase):
         return Task.cont
 
     def gameLoop(self, task):
-        global cycle, scrn, ct2, snake
+        global cycle, scrn, ct2, snake, d, food_pos, snk_list, capture, snk_length
 
         if scrn == 1:
             self.accept('arrow_down', self.keyboard_down, [3])
@@ -229,7 +291,34 @@ class MediaPlayer(ShowBase):
         elif scrn == 3:
             if ct2 == 5:
                 self.direction()
-                #print(snake)
+                ss = list(d.keys())[list(d.values()).index(snake)]
+                spl = ss.split()
+                his = ss + " " + snk_dir
+                snk_history.append(his)
+                snk_history.pop(0)
+                
+                spl2 = '{} {}'.format(spl[1],spl[2])
+                
+                ps = []
+                for i in snk_history:
+                    p = i.split()
+                    pp = '{} {}'.format(p[1],p[2])
+                    ps.append(pp)
+                
+                counts = dict()
+                for j in ps:
+                    counts[j] = counts.get(j, 0) + 1
+
+                snk_list = list(counts.values())
+                self.update_snake()
+                
+                if capture <= snk_length:
+                    capture += 1
+
+                boundary = snk_history[-1].split()
+                if boundary[1] == '0' or boundary[2] == '0' or boundary[1] == '21' or boundary[2] == '21' or ((len(snk_list) <= snk_length) and capture-1 == snk_length) or counts[spl2] == 2:
+                    self.reset()
+
                 ct2 = 0
             else:
                 ct2 += 1
@@ -285,35 +374,42 @@ class MediaPlayer(ShowBase):
 
 
     def snake_up(self):
-        global snake
+        global snake, var, snk_dir
         if snake[0] <= 6.5 and snake[1] <= 6.5:
             snake[0] += 0.65
             snake[1] += 0.65
-            self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], 0, 45, 0)
-                
+            var.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], 0, 45, 0)
+            snk_dir = '0 45 0'
+            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], 0, 45, 0)
+                    
             
     def snake_dn(self):
-        global snake
+        global snake, var, snk_dir
         if snake[0] >= -7.0 and snake[1] >= -7.0:
             snake[0] -= 0.65
             snake[1] -= 0.65
-            self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], -180, -45, 0)
-            
+            var.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], -180, -45, 0)
+            snk_dir = '-180 -45 0'
+            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], -180, -45, 0)
+                 
            
     def snake_lt(self):
-        global snake
+        global snake, var, snk_dir
         if snake[2] >= -10.5:
             snake[2] -= 1
-            self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, 90, 0, 0)
-            
+            var.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, 90, 0, 0)
+            snk_dir = '90 0 0'
+            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, 90, 0, 0)
             
 
     def snake_rt(self):
-        global snake
+        global snake, var, snk_dir
         if snake[2] <= 9.5:
             snake[2] += 1
-            self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, -90, 0, 0)
-
+            var.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, -90, 0, 0)
+            snk_dir = '-90 0 0'
+            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, -90, 0, 0)
+            
 
     def selectCycle(self):
         global cycle,scrn
@@ -392,15 +488,22 @@ class MediaPlayer(ShowBase):
             return Task.cont
 
     def fod(self):
-        global food_pos, snake
+        global food_pos, snake, snk_length, capture
         ss = list(d.keys())[list(d.values()).index(snake)]
         fd1 = ss.split()
         fd2 =food_pos.split()
-        #ss2 = '{} {} {}'.format(int(ss1[0]),int(ss1[1]) + 1,int(ss1[2]) + 1)
         if int(fd1[1])+1 == int(fd2[1]) and int(fd1[2]) == int(fd2[2]):
-            x = random.randint(1, 21)
-            y = random.randint(1, 21)
+            x = random.randint(2, 20)
+            y = random.randint(2, 20)
+
+
+            snk_length += 1
+            his = ss + " " + snk_dir
+            snk_history.append(his)
+            capture = 0
+            
             if ent[x][y] != 1:
+                self.add_snake()
                 food_pos = '0 {} {}'.format(x,y)
         self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
 
