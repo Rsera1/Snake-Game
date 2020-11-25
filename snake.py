@@ -159,8 +159,6 @@ class MediaPlayer(ShowBase):
         self.add_snake()
         ct += 1
 
-
-
     def title_screen(self):
         self.t1 = addTitle(0.5, "PYTHO")
         self.t2 = addInstructions(1, "START")
@@ -235,8 +233,7 @@ class MediaPlayer(ShowBase):
             arr = joycon.get_status()
             arr2 = arr['buttons']['right']
             arr3 = arr['analog-sticks']['right']
-            #print(arr3)
-
+            
             if arr2['a'] + new == 1:
                 if arr2['a'] == 1:
                     self.enter_button()
@@ -291,9 +288,7 @@ class MediaPlayer(ShowBase):
                     rs_right = right
 
         except NameError:
-            print("JoyCon Status Denied")
-
-        #self.joy(arr)
+            pass
 
         return Task.cont
 
@@ -413,7 +408,6 @@ class MediaPlayer(ShowBase):
             snake[1] += 0.65
             var.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], 0, 45, 0)
             snk_dir = '0 45 0'
-            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], 0, 45, 0)
                     
             
     def snake_dn(self):
@@ -423,7 +417,6 @@ class MediaPlayer(ShowBase):
             snake[1] -= 0.65
             var.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], -180, -45, 0)
             snk_dir = '-180 -45 0'
-            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0], -1+snake[1], -180, -45, 0)
                  
            
     def snake_lt(self):
@@ -432,7 +425,6 @@ class MediaPlayer(ShowBase):
             snake[2] -= 1
             var.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, 90, 0, 0)
             snk_dir = '90 0 0'
-            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, 90, 0, 0)
             
 
     def snake_rt(self):
@@ -441,7 +433,6 @@ class MediaPlayer(ShowBase):
             snake[2] += 1
             var.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, -90, 0, 0)
             snk_dir = '-90 0 0'
-            #self.snake.setPosHpr(0.2+snake[2], 46+snake[0]-0.7, -1+snake[1]-0.7, -90, 0, 0)
             
 
     def selectCycle(self):
