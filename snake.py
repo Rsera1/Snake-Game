@@ -97,13 +97,13 @@ class MediaPlayer(ShowBase):
         self.m = self.loader.loadModel("snake_game.egg")
         self.m.reparentTo(self.render)
         self.m.setPosHpr(0, 45, 0, 0, 45, 0)
-        self.food = Actor("Food.egg")
+        self.food = self.loader.loadModel("Food.egg")
         self.food.reparentTo(self.render)
         self.food.setPosHpr(0.2+d[food_pos][2], 46+d[food_pos][0], -1+d[food_pos][1], 0, 0, 0)
 
     def add_snake(self):
         global snks, var, ct
-        snks.append(Actor("python.egg"))
+        snks.append(self.loader.loadModel("python.egg"))
         for i in range(len(snks)):
             var = snks[i]
             var.reparentTo(self.render)
@@ -132,7 +132,7 @@ class MediaPlayer(ShowBase):
     def reset(self):
         global food_pos, snks, var, snk_length, snk_history, snk_dir, snake, flag, ent, ct, pos_arr, dir_arr, scr
         for i in range(len(snks)):
-            snks[i].cleanup()
+            snks[i].removeNode()
 
         food_pos = '0 4 4'
         snks = []
