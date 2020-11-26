@@ -23,10 +23,10 @@ right-stick = scroll
 ## Game Controls:
 - Keyboard
 ```
-up-arrow = move forward
-down-arrow = move backwards
-left-arrow = move left
-right-arrow = move right
+up-arrow or w = move forward
+down-arrow or s = move backwards
+left-arrow or a = move left
+right-arrow or d = move right
 ```
 - Right Nintendo Joycon
 ```
