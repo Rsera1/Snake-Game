@@ -355,6 +355,10 @@ class MediaPlayer(ShowBase):
             self.accept('arrow_up', self.up_flag)
             self.accept('arrow_left', self.lt_flag)
             self.accept('arrow_right', self.rt_flag)
+            self.accept('s', self.dn_flag)
+            self.accept('w', self.up_flag)
+            self.accept('a', self.lt_flag)
+            self.accept('d', self.rt_flag)
 
         self.accept('enter', self.enter_button) 
 
@@ -375,17 +379,21 @@ class MediaPlayer(ShowBase):
 
 
     def dn_flag(self):
-        global flag
-        flag = [1,0,0,0]
+        global flag, snk_dir
+        if snk_dir != '0 45 0':
+            flag = [1,0,0,0]
     def up_flag(self):
-        global flag
-        flag = [0,1,0,0]
+        global flag, snk_dir
+        if snk_dir != '-180 -45 0':
+            flag = [0,1,0,0]
     def lt_flag(self):
-        global flag
-        flag = [0,0,1,0]
+        global flag, snk_dir
+        if snk_dir != '-90 0 0':
+            flag = [0,0,1,0]
     def rt_flag(self):
-        global flag
-        flag = [0,0,0,1]
+        global flag, snk_dir
+        if snk_dir != '90 0 0':
+            flag = [0,0,0,1]
 
 
 
