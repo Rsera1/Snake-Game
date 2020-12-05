@@ -4,6 +4,7 @@
 1. ```pip install Panda3D```
 2. ```pip install hid```
 3. ```pip install joycon-python hidapi pyglm```
+4. ```pip install SoundCard```
 ## Run: 
 ```python <directory>\snake.py```
 
