@@ -20,6 +20,7 @@ enter = select option
 - Right Nintendo Joycon
 ```
 right-stick = scroll
+a = select option
 ```
 ## Game Controls:
 - Keyboard
@@ -31,8 +32,8 @@ right-arrow or d = move right
 ```
 - Right Nintendo Joycon
 ```
-Y = move forward
-A = move backwards
-B = move left
-X = move right
+stick-up = move forward
+stick-down = move down
+stick-left = move left
+stick-right = move right
 ```
