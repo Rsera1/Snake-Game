@@ -27,10 +27,14 @@ except:
     print("JoyCon can't connect")
 
 
+with open('highscore.txt') as g:                       # Reads from the highscore text file. When you quit the game the current highscore saves to this file.
+    highscore = g.read()
+
 with open('placement.txt') as f:                       # Opens a preset json file for coordinates the snake can move to
     data = f.read() 
   
 d = json.loads(data) 
+h = json.loads(highscore)
 
 food_pos = '0 4 4'                                     # Placement of the snake food in the game area
 food_flag = 0                                          # A flag to allow the food to spawn when the game starts
@@ -55,20 +59,8 @@ speaker = 0                                            # Flag to know when onscr
 
 ent = [[0 for c in range(22)] for r in range(22)]      # Array of all placements the snake can be
 
-
-def addInstructions(pos, msg):                                                          # Displays text
-    return OnscreenText(text=msg, style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
-                        parent=base.a2dTopLeft, align=TextNode.ALeft,
-                        pos=(0.08, -pos - 0.04), scale=.09)
-
-# Function to put title on the screen.
-def addTitle(pos, text):                                                                # Displays text
-    return OnscreenText(text=text, style=1, pos=(0.36, -pos - 0.04), scale=0.6,         
-                        parent=base.a2dTopLeft, align=TextNode.ALeft,
-                        fg=(1, 1, 1, 1), shadow=(0, 0, 0, 1))
-
 scr = 0                                                # Score counter
-hscr = 0                                               # Highscore counter
+hscr = h['hs']                                               # Highscore counter
 ct,ct2= 0,0                                            # Counters for timing tasks
 
 new = 0                                                # Previous button position of 'a' on the joycon
@@ -80,6 +72,16 @@ snk_list = []                                          # Used for boundary ident
 pos_arr = []                                           # Array to keep track of snake position history
 dir_arr = []                                           # Array to keep track of snake direction history
 
+def addInstructions(pos, msg):                                                          # Displays text
+    return OnscreenText(text=msg, style=1, fg=(0, 0, 0, 1), shadow=(1, 1, 1, 1),
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        pos=(0.08, -pos - 0.04), scale=.09)
+
+# Function to put title on the screen.
+def addTitle(pos, text):                                                                # Displays text
+    return OnscreenText(text=text, style=1, pos=(0.36, -pos - 0.04), scale=0.6,         
+                        parent=base.a2dTopLeft, align=TextNode.ALeft,
+                        fg=(1, 1, 1, 1), shadow=(0, 0, 0, 1))
 class MediaPlayer(ShowBase):                                          # Class for the game
     
     def __init__(self):                                               # Performs initial task when the game start up
@@ -233,7 +235,7 @@ class MediaPlayer(ShowBase):                                          # Class fo
             self.options_screen(1)
             cycle = 1
 
-        elif cycle == 3 and scrn == 1 or cycle == 2 and scrn == 4:
+        elif cycle == 3 and scrn == 1:
             sys.exit()
 
         elif cycle == 1 and scrn == 2:
@@ -282,6 +284,12 @@ class MediaPlayer(ShowBase):                                          # Class fo
             self.selector.destroy()
             self.reset()
             scrn = 3
+
+        elif cycle == 2 and scrn == 4:
+            h['hs'] = hscr
+            with open('highscore.txt', 'w') as out: 
+                json.dump(h, out)                      
+            sys.exit()
 
         self.selectCycle()
 
@@ -586,14 +594,14 @@ class MediaPlayer(ShowBase):                                          # Class fo
             card.setTexture(self.tex)
             self.sound = loader.loadSfx("Aesir.avi")
             self.sound.setLoop(True)
-            self.sound.play()
+            #self.sound.play()
             self.tex.setLoop(True)
             self.tex.play()
             vid = 1;
             return Task.cont
         elif vid == 2:
             self.tex.stop()
-            self.sound.stop()
+            #self.sound.stop()
             card.removeNode()
             return Task.done
         else:
