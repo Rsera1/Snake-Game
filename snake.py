@@ -12,6 +12,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.actor.Actor import Actor
 import random
 import time, sys, os, json
+loadPrcFileData('', 'win-fixed-size 1')                # Fixed window size
 
 if os.environ.get('OS','') == 'Windows_NT':            # Checks if the computer running the program is Windows
     try:                                               # Tries to import the joycon dependency
